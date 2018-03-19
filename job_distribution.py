@@ -37,24 +37,25 @@ class Dist:
     def bi_model_dist(self):
 
         # -- job length --
-        if np.random.rand() < self.job_small_chance:  # small job
-            nw_len = np.random.randint(self.job_len_small_lower,
-                                       self.job_len_small_upper + 1)
-        else:  # big job
-            nw_len = np.random.randint(self.job_len_big_lower,
-                                       self.job_len_big_upper + 1)
+      #  if np.random.rand() < self.job_small_chance:  # small job
+      #      nw_len = np.random.randint(self.job_len_small_lower,
+      #                                 self.job_len_small_upper + 1)
+      #  else:  # big job
+      #      nw_len = np.random.randint(self.job_len_big_lower,
+      #                                 self.job_len_big_upper + 1)
+        nw_len = 1
 
         nw_size = np.zeros(self.num_res)
 
         # -- job resource request --
-        dominant_res = np.random.randint(0, self.num_res)
-        for i in range(self.num_res):
-            if i == dominant_res:
-                nw_size[i] = np.random.randint(self.dominant_res_lower,
-                                               self.dominant_res_upper + 1)
-            else:
-                nw_size[i] = np.random.randint(self.other_res_lower,
-                                               self.other_res_upper + 1)
+#        dominant_res = np.random.randint(0, self.num_res)
+#        for i in range(self.num_res):
+#            if i == dominant_res:
+        nw_size[0] = np.random.randint(self.dominant_res_lower,
+                                           self.dominant_res_upper + 1)
+#            else:
+#                nw_size[i] = np.random.randint(self.other_res_lower,
+#                                               self.other_res_upper + 1)
 
         return nw_len, nw_size
 
@@ -72,9 +73,9 @@ def generate_sequence_work(pa, seed=42):
 
     for i in range(simu_len):
 
-        if np.random.rand() < pa.new_job_rate:  # a new job comes
+        #if np.random.rand() < pa.new_job_rate:  # a new job comes
 
-            nw_len_seq[i], nw_size_seq[i, :] = nw_dist()
+        nw_len_seq[i], nw_size_seq[i, :] = nw_dist()
 
     nw_len_seq = np.reshape(nw_len_seq,
                             [pa.num_ex, pa.simu_len])

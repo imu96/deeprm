@@ -61,10 +61,9 @@ class Env:
         nw_size_seq = np.zeros((simu_len, self.pa.num_res), dtype=int)
 
         for i in range(simu_len):
+            nw_len_seq[i], nw_size_seq[i, :] = self.nw_dist()
+            #if np.random.rand() < self.pa.new_job_rate:  # a new job comes
 
-            if np.random.rand() < self.pa.new_job_rate:  # a new job comes
-
-                nw_len_seq[i], nw_size_seq[i, :] = self.nw_dist()
 
         return nw_len_seq, nw_size_seq
 
@@ -314,7 +313,7 @@ class Env:
                 self.seq_no = (self.seq_no + 1) % self.pa.num_ex
 
             self.reset()
-        
+
         if self.render:
             self.plot_state()
 
