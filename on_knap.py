@@ -27,6 +27,12 @@ def on_kp_threshold(items,  capacity, upper_bound, lower_bound):
             used_space += i[0]
     return bag;
 
+def value(bag):
+    val = 0
+    for i in bag:
+        val += i[0] * i[1]
+    return val
+
 test_upper = 200
 test_lower = 1
 test_capacity = 21

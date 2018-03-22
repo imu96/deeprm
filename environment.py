@@ -15,7 +15,7 @@ class Env:
         self.repre = repre  # image or compact representation
         self.end = end  # termination type, 'no_new_job' or 'all_done'
 
-        self.nw_dist = pa.dist.bi_model_dist
+        self.nw_dist = pa.dist.normal_dist
 
         self.curr_time = 0
 
