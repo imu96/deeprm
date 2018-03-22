@@ -245,8 +245,8 @@ class Env:
 
         if status == 'MoveOn':
             self.curr_time += 1
-            self.machine.time_proceed(self.curr_time)
-            self.extra_info.time_proceed()
+            #self.machine.time_proceed(self.curr_time)
+            #self.extra_info.time_proceed()
 
             # add new jobs
             self.seq_idx += 1
