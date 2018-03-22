@@ -12,6 +12,7 @@ class Parameters:
         self.num_epochs = 10000         # number of training epochs
         self.simu_len = 10             # length of the busy cycle that repeats itself
         self.num_ex = 1                # number of sequences
+        self.max_density = 20
 
         self.output_freq = 100          # interval for output and store parameters
 
@@ -21,8 +22,8 @@ class Parameters:
         self.num_res = 1               # number of resources in the system
         self.num_nw = 1                # maximum allowed number of work in the queue
 
-        #self.time_horizon = 20         # number of time steps in the graph
-        self.max_job_len = 1          # maximum duration of new jobs
+        self.time_horizon = max_density         # number of time steps in the graph
+        self.max_job_len = max_density         # maximum duration of new jobs
         self.res_slot = 200            # maximum number of available resource slots
         self.max_job_size = 5*2         # maximum resource request of new work
 
