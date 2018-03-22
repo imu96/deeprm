@@ -272,11 +272,11 @@ class Env:
 
                         to_backlog = True
                         for i in xrange(self.pa.num_nw):
-                            if self.job_slot.slot[i] is None:  # put in new visible job slots
-                                self.job_slot.slot[i] = new_job
-                                self.job_record.record[new_job.id] = new_job
-                                to_backlog = False
-                                break
+#                            if self.job_slot.slot[i] is None:  # put in new visible job slots
+                            self.job_slot.slot[i] = new_job
+                            self.job_record.record[new_job.id] = new_job
+                            to_backlog = False
+                            break
 
                         if to_backlog:
                             if self.job_backlog.curr_size < self.pa.backlog_size:
@@ -378,7 +378,8 @@ class Machine:
 
         allocated = False
 
-        for t in xrange(0, self.time_horizon - job.len):
+#        for t in xrange(0, self.time_horizon - job.len):
+        for t in xrange(0,1):
 
             new_avbl_res = self.avbl_slot[t: t + job.len, :] - job.res_vec
 
