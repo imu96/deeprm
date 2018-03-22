@@ -210,17 +210,17 @@ class Env:
 
     def get_reward(self):
 
-        reward = 0
-        for j in self.machine.running_job:
-            reward += self.pa.delay_penalty / float(j.len)
-
-        for j in self.job_slot.slot:
-            if j is not None:
-                reward += self.pa.hold_penalty / float(j.len)
-
-        for j in self.job_backlog.backlog:
-            if j is not None:
-                reward += self.pa.dismiss_penalty / float(j.len)
+        reward = count_nonzero(self.machine.canvas)
+#        for j in self.machine.running_job:
+#            reward += self.pa.delay_penalty / float(j.len)
+#
+#        for j in self.job_slot.slot:
+#            if j is not None:
+#                reward += self.pa.hold_penalty / float(j.len)
+#
+#        for j in self.job_backlog.backlog:
+#            if j is not None:
+#                reward += self.pa.dismiss_penalty / float(j.len)
 
         return reward
 

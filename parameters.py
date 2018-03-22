@@ -9,15 +9,17 @@ class Parameters:
 
         self.output_filename = 'data/tmp'
 
-        self.num_epochs = 10000         # number of training epochs
-        self.simu_len = 10             # length of the busy cycle that repeats itself
-        self.num_ex = 1                # number of sequences
+        self.num_items = 150
         self.max_density = 20
+
+        self.num_epochs = 10000         # number of training epochs
+        self.simu_len = num_items             # length of the busy cycle that repeats itself
+        self.num_ex = 1                # number of sequences
 
         self.output_freq = 100          # interval for output and store parameters
 
         self.num_seq_per_batch = 10    # number of sequences to compute baseline
-        self.episode_max_length = 150  # enforcing an artificial terminal
+        self.episode_max_length = num_items  # enforcing an artificial terminal
 
         self.num_res = 1               # number of resources in the system
         self.num_nw = 1                # maximum allowed number of work in the queue
@@ -31,7 +33,7 @@ class Parameters:
 
         self.max_track_since_new = 10  # track how many time steps since last new jobs
 
-        self.job_num_cap = 40          # maximum number of distinct colors in current work graph
+        self.job_num_cap = num_items          # maximum number of distinct colors in current work graph
 
         self.new_job_rate = 0.7        # lambda in new job arrival Poisson Process
 					# the job rate would probably be much closer to one
