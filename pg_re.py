@@ -232,7 +232,16 @@ def launch(pa, pg_resume=None, render=False, repre='image', end='no_new_job'):
     envs = []
 
     nw_len_seqs, nw_size_seqs = job_distribution.generate_sequence_work(pa, seed=42)
-
+    item_file = pa.output_filename + '_items.txt'
+    with open(item_file, 'w') as f:
+        f.write("Job (size, value)\n")
+        for j in xrange(0, len(nw_len_seqs)):
+            f.write("Sequence "+str(j)+"\n")
+            for i in xrange(0,len(nw_len_seqs[j])):
+                job_str = "Job "+str(i)+":"+"\t"+str(nw_size_seqs[j][i][0])+"\t"+str(nw_len_seqs[j][i]) + "\n"
+                f.write(job_str)
+            f.write("\n")
+        
     for ex in xrange(pa.num_ex):
 
         print "-prepare for env-", ex
