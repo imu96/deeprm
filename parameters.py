@@ -13,27 +13,27 @@ class Parameters:
         self.max_density = 20
 
         self.num_epochs = 10000         # number of training epochs
-        self.simu_len = num_items             # length of the busy cycle that repeats itself
-        self.num_ex = 1                # number of sequences
+        self.simu_len = self.num_items       # length of the busy cycle that repeats itself
+        self.num_ex = 1                # number of jobsets
 
         self.output_freq = 100          # interval for output and store parameters
 
-        self.num_seq_per_batch = 10    # number of sequences to compute baseline
-        self.episode_max_length = num_items  # enforcing an artificial terminal
+        self.num_seq_per_batch = 10    # number of sequences to compute baseline, actually number of trajectories
+        self.episode_max_length = self.num_items  # enforcing an artificial terminal
 
         self.num_res = 1               # number of resources in the system
         self.num_nw = 1                # maximum allowed number of work in the queue
 
-        self.time_horizon = max_density         # number of time steps in the graph
-        self.max_job_len = max_density         # maximum duration of new jobs
+        self.time_horizon = self.max_density         # number of time steps in the graph
+        self.max_job_len = self.max_density         # maximum duration of new jobs
         self.res_slot = 200            # maximum number of available resource slots
         self.max_job_size = 5*2         # maximum resource request of new work
 
-        self.backlog_size = 0         # backlog queue size
+        self.backlog_size = self.max_density         # backlog queue size
 
         self.max_track_since_new = 10  # track how many time steps since last new jobs
 
-        self.job_num_cap = num_items          # maximum number of distinct colors in current work graph
+        self.job_num_cap = self.num_items          # maximum number of distinct colors in current work graph
 
         self.new_job_rate = 0.7        # lambda in new job arrival Poisson Process
 					# the job rate would probably be much closer to one
