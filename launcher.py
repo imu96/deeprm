@@ -134,7 +134,8 @@ def main():
         elif opt in ("-r", "--render"):
             render = (arg == 'True')
         elif opt in ("-u", "--unseen"):
-            pa.generate_unseen = (arg == 'True')
+            #pa.generate_unseen = (arg == 'True')
+            pa.unseen = (arg == 'True')
         else:
             script_usage()
             sys.exit()

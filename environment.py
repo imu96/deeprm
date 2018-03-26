@@ -210,7 +210,7 @@ class Env:
 
     def get_reward(self):
 
-        reward = count_nonzero(self.machine.canvas)
+        reward = np.count_nonzero(self.machine.canvas)
 #        for j in self.machine.running_job:
 #            reward += self.pa.delay_penalty / float(j.len)
 #
