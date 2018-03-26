@@ -228,7 +228,7 @@ class Env:
         return reward
 
     def step(self, a, repeat=False, test_type=''):
-
+        #a is the output of the network
         status = None
 
         done = False
