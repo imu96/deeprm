@@ -229,18 +229,19 @@ class Env:
 
     def step(self, a, repeat=False, test_type=''):
         #a is the output of the network
+        #in the nbin problem it is which bin to put the item in, or void
         status = None
 
         done = False
         reward = 0
         info = None
 
-        if a == self.pa.num_nw:  # explicit void action
+        if a == self.pa.num_res:  # explicit void action
             status = 'MoveOn'
         elif self.job_slot.slot[a] is None:  # implicit void action
             status = 'MoveOn'
         else:
-            allocated = self.machine.allocate_job(self.job_slot.slot[a], self.curr_time)
+            allocated = self.machine.allocate_job(self.job_slot.slot[0],a)
             if not allocated:  # implicit void action
                 status = 'MoveOn'
             else:
@@ -377,22 +378,19 @@ class Machine:
         # graphical representation
         self.canvas = np.zeros((pa.num_res, pa.time_horizon, pa.res_slot))
 
-    def allocate_job(self, job, curr_time):
+    def allocate_job(self, job, bin_num):
 
         allocated = False
 
-#        for t in xrange(0, self.time_horizon - job.len):
-        for t in xrange(0,1):
+        t = 0
 
-            new_avbl_res = self.avbl_slot[t: t + job.len, :] - job.res_vec
+        new_avbl_res = self.avbl_slot[t: t + job.len, bin_num] - job.res_vec
 
-            if np.all(new_avbl_res[:] >= 0):
+            if new_avbl_res[bin_num] >= 0:
 
                 allocated = True
 
-                self.avbl_slot[t: t + job.len, :] = new_avbl_res
-                job.start_time = curr_time + t
-                job.finish_time = job.start_time + job.len
+                self.avbl_slot[t: t + job.len, bin_num] = new_avbl_res
 
                 self.running_job.append(job)
 
@@ -405,18 +403,13 @@ class Machine:
                         new_color = color
                         break
 
-                assert job.start_time != -1
-                assert job.finish_time != -1
-                assert job.finish_time > job.start_time
-                canvas_start_time = job.start_time - curr_time
-                canvas_end_time = job.finish_time - curr_time
+                canvas_start_time = t
+                canvas_end_time = job.len
 
-                for res in xrange(self.num_res):
-                    avbl_slot = np.where(self.canvas[res, 0, :] == 0)[0]
-                    for i in range(canvas_start_time, canvas_end_time):
-                        self.canvas[res, i, avbl_slot[: job.res_vec[res]]] = new_color
-
-                break
+                res = bin_num
+                avbl_slot = np.where(self.canvas[res, 0, :] == 0)[0]
+                for i in range(canvas_start_time, canvas_end_time):
+                    self.canvas[res, i, avbl_slot[: job.res_vec[res]]] = new_color
 
         return allocated
 

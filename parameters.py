@@ -61,7 +61,7 @@ class Parameters:
         self.network_compact_dim = (self.num_res + 1) * \
             (self.time_horizon + self.num_nw) + 1  # + 1 for backlog indicator
 
-        self.network_output_dim = self.num_nw + 1  # + 1 for void action
+        self.network_output_dim = self.num_res+ 1  # + 1 for void action
 
         self.delay_penalty = -1       # penalty for delaying things in the current work screen
         self.hold_penalty = -1        # penalty for holding things in the new work screen
