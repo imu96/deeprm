@@ -517,7 +517,7 @@ def test_compact_speed():
 
     start_time = time.time()
     for i in xrange(100000):
-        a = other_agents.get_sjf_action(env.machine, env.job_slot)
+        a = other_agents.get_kp_action(env.machine, env.job_slot, pa.max_density, pa.min_density)
         env.step(a)
     end_time = time.time()
     print "- Elapsed time: ", end_time - start_time, "sec -"
@@ -538,13 +538,13 @@ def test_image_speed():
 
     start_time = time.time()
     for i in xrange(100000):
-        a = other_agents.get_sjf_action(env.machine, env.job_slot)
+        a = other_agents.get_kp_action(env.machine, env.job_slot, pa.max_density, pa.min_density)
         env.step(a)
     end_time = time.time()
     print "- Elapsed time: ", end_time - start_time, "sec -"
 
 
 if __name__ == '__main__':
-    test_backlog()
+    #test_backlog()
     test_compact_speed()
     test_image_speed()

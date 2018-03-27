@@ -57,6 +57,9 @@ def get_traj(test_type, pa, env, episode_max_length, pg_resume=None, render=Fals
         if test_type == 'PG':
             a = pg_learner.choose_action(ob)
 
+        elif test_type == 'KP':
+            a = other_agents.get_kp_action(env.machine, env.job_slot, pa.max_density, pa.min_density)
+
         elif test_type == 'Tetris':
             a = other_agents.get_packer_action(env.machine, env.job_slot)
 
@@ -81,7 +84,7 @@ def launch(pa, pg_resume=None, render=False, plot=False, repre='image', end='no_
 
     # ---- Parameters ----
 
-    test_types = ['Tetris', 'SJF', 'Random']
+    test_types = ['KP', 'Random']
 
     if pg_resume is not None:
         test_types = ['PG'] + test_types
