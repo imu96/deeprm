@@ -386,30 +386,31 @@ class Machine:
 
         new_avbl_res = self.avbl_slot[t: t + job.len, bin_num] - job.res_vec
 
-            if new_avbl_res[bin_num] >= 0:
+        if new_avbl_res[bin_num] >= 0:
 
-                allocated = True
+            allocated = True
 
-                self.avbl_slot[t: t + job.len, bin_num] = new_avbl_res
+            self.avbl_slot[t: t + job.len, bin_num] = new_avbl_res
 
-                self.running_job.append(job)
+            self.running_job.append(job)
 
-                # update graphical representation
+            # update graphical representation
 
-                used_color = np.unique(self.canvas[:])
-                # WARNING: there should be enough colors in the color map
-                for color in self.colormap:
-                    if color not in used_color:
-                        new_color = color
-                        break
+            used_color = np.unique(self.canvas[:])
+            # WARNING: there should be enough colors in the color map
+            for color in self.colormap:
+                if color not in used_color:
+                    new_color = color
+                    break
 
-                canvas_start_time = t
-                canvas_end_time = job.len
+            canvas_start_time = t
+            canvas_end_time = job.len
 
-                res = bin_num
-                avbl_slot = np.where(self.canvas[res, 0, :] == 0)[0]
-                for i in range(canvas_start_time, canvas_end_time):
-                    self.canvas[res, i, avbl_slot[: job.res_vec[res]]] = new_color
+
+            res = bin_num
+            avbl_slot = np.where(self.canvas[res, 0, :] == 0)[0]
+            for i in range(canvas_start_time, canvas_end_time):
+                self.canvas[res, i, avbl_slot[: job.res_vec[res]]] = new_color
 
         return allocated
 
