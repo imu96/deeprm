@@ -76,10 +76,11 @@ class Dist:
         # new work duration
         nw_len = np.random.randint(self.min_job_len, self.job_len + 1)  # same length in every dimension
 
-        nw_size = np.zeros(self.num_res)
+        x = np.random.randint(1, self.max_job_size + 1)
+        nw_size = np.ones(self.num_res) * x
 
-        for i in range(self.num_res):
-            nw_size[i] = np.random.randint(1, self.max_job_size + 1)
+#       for i in range(self.num_res):
+#           nw_size[i] = np.random.randint(1, self.max_job_size + 1)
 
         return nw_len, nw_size
 
