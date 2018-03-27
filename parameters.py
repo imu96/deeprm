@@ -11,6 +11,7 @@ class Parameters:
 
         self.num_items = 150
         self.max_density = 20
+        self.min_density = 1
 
         self.num_epochs = 10000         # number of training epochs
         self.simu_len = self.num_items       # length of the busy cycle that repeats itself
