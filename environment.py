@@ -154,7 +154,7 @@ class Env:
 
             return compact_repr
 
-    def plot_state(self):
+    def plot_state(self, test_type=''):
         plt.figure("screen", figsize=(20, 5))
 
         skip_row = 0
@@ -205,6 +205,7 @@ class Env:
 
         plt.imshow(extra_info, interpolation='nearest', vmax=1)
 
+        plt.savefig(self.pa.output_filename + test_type + '_plot_' + str(self.curr_time) + '.pdf')
         plt.show()     # manual
         # plt.pause(0.01)  # automatic
 
@@ -224,7 +225,7 @@ class Env:
 
         return reward
 
-    def step(self, a, repeat=False):
+    def step(self, a, repeat=False, test_type=''):
 
         status = None
 
@@ -315,7 +316,7 @@ class Env:
             self.reset()
 
         if self.render:
-            self.plot_state()
+            self.plot_state(test_type=test_type)
 
         return ob, reward, done, info
 

@@ -69,7 +69,7 @@ def get_traj(test_type, pa, env, episode_max_length, pg_resume=None, render=Fals
         elif test_type == 'Random':
             a = other_agents.get_random_action(env.job_slot)
 
-        ob, rew, done, info = env.step(a, repeat=True)
+        ob, rew, done, info = env.step(a, repeat=True, test_type=test_type)
 
         rews.append(rew)
 
@@ -89,7 +89,7 @@ def launch(pa, pg_resume=None, render=False, plot=False, repre='image', end='no_
     if pg_resume is not None:
         test_types = ['PG'] + test_types
 
-    env = environment.Env(pa, render, repre=repre, end=end)
+    env = environment.Env(pa, render=render, repre=repre, end=end)
     nw_len_seqs = env.nw_len_seqs
     nw_size_seqs = env.nw_size_seqs
     item_file = pa.output_filename + '_items.txt'
@@ -173,7 +173,7 @@ def launch(pa, pg_resume=None, render=False, plot=False, repre='image', end='no_
         cm = plt.get_cmap('gist_rainbow')
         fig = plt.figure()
         ax = fig.add_subplot(111)
-        ax.set_color_cycle([cm(1. * i / num_colors) for i in range(num_colors)])
+        ax.set_prop_cycle('color', [cm(1. * i / num_colors) for i in range(num_colors)])
 
         for test_type in test_types:
             slow_down_cdf = np.sort(np.concatenate(jobs_slow_down[test_type]))
