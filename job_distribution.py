@@ -34,6 +34,12 @@ class Dist:
 
         return nw_len, nw_size
 
+    def const_dist(self):
+
+        nw_len = 4
+        nw_size = np.ones(self.num_res) * 5
+        return nw_len, nw_size
+
     def bi_model_dist(self):
 
         # -- job length --
