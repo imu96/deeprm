@@ -369,7 +369,7 @@ class Machine:
         self.running_job = []
 
         # colormap for graphical representation
-        self.colormap = np.arange(1 / float(pa.job_num_cap), 1, 1 / float(pa.job_num_cap))
+        self.colormap = np.arange(1 / (20 * float(pa.job_num_cap)), 1, 1 / (20 * float(pa.job_num_cap)))
         np.random.shuffle(self.colormap)
 
         # graphical representation
@@ -410,8 +410,8 @@ class Machine:
                 canvas_end_time = job.finish_time - curr_time
 
                 for res in xrange(self.num_res):
+                    avbl_slot = np.where(self.canvas[res, 0, :] == 0)[0]
                     for i in range(canvas_start_time, canvas_end_time):
-                        avbl_slot = np.where(self.canvas[res, i, :] == 0)[0]
                         self.canvas[res, i, avbl_slot[: job.res_vec[res]]] = new_color
 
                 break
