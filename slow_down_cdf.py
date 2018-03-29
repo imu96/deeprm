@@ -129,6 +129,7 @@ def launch(pa, pg_resume=None, render=False, plot=False, repre='image', end='no_
             print "---------- " + test_type + " -----------"
 
             print "total discount reward : \t %s" % (discount(rews, pa.discount)[0])
+            print "value in knapsack \t %s" % (rews[-1])
 
             all_discount_rews[test_type].append(
                 discount(rews, pa.discount)[0]
