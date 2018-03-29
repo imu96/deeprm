@@ -32,6 +32,14 @@ class Dist:
         self.bad_i = 0
         self.bad_w = 1
 
+        self.bimod_w_std = 5
+        self.bimod_w_mu = [5, 100]
+
+        self.normal_w_std = 5
+        self.normal_w_mu = 10
+        self.normal_v_std = 20
+        self.normal_v_mu = 50
+
     # this is the sequence from the online knapsack paper which has the sequence
     # of higher and higher exponential curves
     def bad_dist(self):
@@ -74,6 +82,24 @@ class Dist:
             nw_size[i] = np.random.randint(1, self.max_job_size + 1)
 
         return nw_len, nw_size
+
+    def real_normal_dist(self):
+        nw_size = np.zeros(self.num_res)
+
+        for i in range(self.num_res):
+            nw_size[i] = np.random.normal(self.normal_w_mu, self.normal_w_std)
+            if nw_size[i] < 1:
+                nw_size[i] = 1
+        #do values
+        return nw_len, nw_size
+
+    def bimodal_dist(self):
+
+        #check for going over upper/lower bounds and round off
+        #maybe use random.randint to get 1 or 2 and then choose which normal to
+       # generate from?
+
+
 
     def const_dist(self):
 
