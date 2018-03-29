@@ -238,7 +238,7 @@ class Env:
 
         if a == self.pa.num_res:  # explicit void action
             status = 'MoveOn'
-        elif self.job_slot.slot[a] is None:  # implicit void action
+        elif self.job_slot.slot[0] is None:  # implicit void action
             status = 'MoveOn'
         else:
             allocated = self.machine.allocate_job(self.job_slot.slot[0],a)
@@ -296,8 +296,8 @@ class Env:
             reward = self.get_reward()
 
         elif status == 'Allocate':
-            self.job_record.record[self.job_slot.slot[a].id] = self.job_slot.slot[a]
-            self.job_slot.slot[a] = None
+            self.job_record.record[self.job_slot.slot[0].id] = self.job_slot.slot[0]
+            self.job_slot.slot[0] = None
 
             # dequeue backlog
             if self.job_backlog.curr_size > 0:
@@ -384,9 +384,9 @@ class Machine:
 
         t = 0
 
-        new_avbl_res = self.avbl_slot[t: t + job.len, bin_num] - job.res_vec
+        new_avbl_res = self.avbl_slot[t: t + job.len, bin_num] - job.res_vec[bin_num]
 
-        if new_avbl_res[bin_num] >= 0:
+        if np.all(new_avbl_res >= 0):
 
             allocated = True
 
