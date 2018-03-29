@@ -15,7 +15,7 @@ class Env:
         self.repre = repre  # image or compact representation
         self.end = end  # termination type, 'no_new_job' or 'all_done'
 
-        self.nw_dist = pa.dist.normal_dist
+        self.nw_dist = pa.dist_func
 
         self.curr_time = 0
 
@@ -61,6 +61,8 @@ class Env:
         nw_size_seq = np.zeros((simu_len, self.pa.num_res), dtype=int)
 
         for i in range(simu_len):
+            if (i % self.pa.simu_len == 0):
+                self.pa.dist.reset_dists()
             nw_len_seq[i], nw_size_seq[i, :] = self.nw_dist()
             #if np.random.rand() < self.pa.new_job_rate:  # a new job comes
 

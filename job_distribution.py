@@ -1,4 +1,5 @@
 import numpy as np
+import math
 
 
 class Dist:
@@ -22,10 +23,50 @@ class Dist:
         self.other_res_lower = 1
         self.other_res_upper = max_job_size / 5
 
-    def normal_dist(self):
+        self.min_job_len = 1
+
+        self.bad_eta = 1
+        self.bad_B = 1
+        self.bad_k = int(math.log(job_len / self.min_job_len) / math.log(1 + self.bad_eta))
+        self.bad_j = 0
+        self.bad_i = 0
+        self.bad_w = 1
+
+    # this is the sequence from the online knapsack paper which has the sequence
+    # of higher and higher exponential curves
+    def bad_dist(self):
+        # weight of item is 1
+        nw_size = np.zeros(self.num_res)
+        for i in range(self.num_res):
+            nw_size[i] = self.bad_w
+
+        if self.bad_j > self.bad_k:
+            nw_len = 0
+
+        else:
+            nw_len = (1 + self.bad_eta)**self.bad_i
+
+        self.bad_i += 1
+
+        if self.bad_i % (self.bad_j + 1) == 0:
+            self.bad_i = 0
+            self.bad_j += 1
+
+        return nw_len, nw_size
+
+    # after running the distribution, you need to reset the indices so you don't
+    # get a bunch of zeroes the next time you ask for the distribution
+    def reset_dists(self):
+        self.bad_j = 0
+        self.bad_i = 0
+
+
+
+    # THIS IS A UNIFORM DISTRIBUTION
+    def uniform_dist(self):
 
         # new work duration
-        nw_len = np.random.randint(1, self.job_len + 1)  # same length in every dimension
+        nw_len = np.random.randint(self.min_job_len, self.job_len + 1)  # same length in every dimension
 
         nw_size = np.zeros(self.num_res)
 
@@ -71,7 +112,7 @@ def generate_sequence_work(pa, seed=42):
 
     simu_len = pa.simu_len * pa.num_ex
 
-    nw_dist = pa.dist.normal_dist
+    nw_dist = pa.dist_func
 
     nw_len_seq = np.zeros(simu_len, dtype=int)
     nw_size_seq = np.zeros((simu_len, pa.num_res), dtype=int)
@@ -79,8 +120,11 @@ def generate_sequence_work(pa, seed=42):
     for i in range(simu_len):
 
         #if np.random.rand() < pa.new_job_rate:  # a new job comes
+        if (i % pa.simu_len == 0):
+            pa.dist.reset_dists()
 
         nw_len_seq[i], nw_size_seq[i, :] = nw_dist()
+
 
     nw_len_seq = np.reshape(nw_len_seq,
                             [pa.num_ex, pa.simu_len])

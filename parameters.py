@@ -44,6 +44,8 @@ class Parameters:
 
         # distribution for new job arrival
         self.dist = job_distribution.Dist(self.num_res, self.max_job_size, self.max_job_len)
+        # the actual distribution to generate
+        self.dist_func = self.dist.uniform_dist
 
         # graphical representation
         assert self.backlog_size % self.time_horizon == 0  # such that it can be converted into an image
