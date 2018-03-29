@@ -86,6 +86,13 @@ def launch(pa, pg_resume=None, render=False, plot=False, repre='image', end='no_
 
     test_types = ['KP', 'Random']
 
+    ratio_comparers = {
+        'optim_type': 'KP',   #denominator
+        'learned_type': 'PG'  #numerator
+    }
+
+    epsilon = 1
+
     if pg_resume is not None:
         test_types = ['PG'] + test_types
 
@@ -102,6 +109,7 @@ def launch(pa, pg_resume=None, render=False, plot=False, repre='image', end='no_
                 f.write(job_str)
 
     all_discount_rews = {}
+    all_knapsac_val = {}
     jobs_slow_down = {}
     work_complete = {}
     work_remain = {}
@@ -111,6 +119,7 @@ def launch(pa, pg_resume=None, render=False, plot=False, repre='image', end='no_
 
     for test_type in test_types:
         all_discount_rews[test_type] = []
+        all_knapsac_val[test_type] = []
         jobs_slow_down[test_type] = []
         work_complete[test_type] = []
         work_remain[test_type] = []
@@ -118,6 +127,7 @@ def launch(pa, pg_resume=None, render=False, plot=False, repre='image', end='no_
         num_job_remain[test_type] = []
         job_remain_delay[test_type] = []
 
+   # for seq_idx in xrange(10):
     for seq_idx in xrange(pa.num_ex):
         print('\n\n')
         print("=============== " + str(seq_idx) + " ===============")
@@ -133,6 +143,10 @@ def launch(pa, pg_resume=None, render=False, plot=False, repre='image', end='no_
 
             all_discount_rews[test_type].append(
                 discount(rews, pa.discount)[0]
+            )
+
+            all_knapsac_val[test_type].append(
+                rews[-1]
             )
 
             # ------------------------
@@ -167,6 +181,42 @@ def launch(pa, pg_resume=None, render=False, plot=False, repre='image', end='no_
             )
 
         env.seq_no = (env.seq_no + 1) % env.pa.num_ex
+
+    # let's crunch some statistics!
+
+    stats_str = "\nStatistics: \n"
+
+    disc_rew_ratios = []
+
+
+    for i in range(len(all_knapsac_val[test_types[0]])):
+        if all_discount_rews[ratio_comparers['optim_type']][i] == 0:
+            continue;
+        disc_rew_ratios.append(
+            float(all_discount_rews[ratio_comparers['learned_type']][i])/all_discount_rews[ratio_comparers['optim_type']][i]
+        )
+
+    avg_rew_ratio = float(sum(disc_rew_ratios))/len(disc_rew_ratios)
+
+    adj_rew_ratios = map(lambda x: x+1, disc_rew_ratios)
+    avg_adj_rew_ratio = float(sum(adj_rew_ratios))/len(adj_rew_ratios)
+
+    stats_str += "Average Ratio Performance of "+ str(ratio_comparers["learned_type"]) + " against " + str(ratio_comparers["optim_type"]) + ":\t" + str(avg_rew_ratio) + " (original) \t" + str(avg_adj_rew_ratio) + " (adjusted)"
+
+    # print disc_rew_ratios
+
+    var_rew = np.var(np.asarray(disc_rew_ratios))
+    var_adj_rew = np.var(np.asarray(adj_rew_ratios))
+
+    stats_str += "\n " + "Variance of ratios: " + str(var_rew) + " (original) \t" + str(var_adj_rew) + " (adjusted)"
+
+    print stats_str
+
+    # f.write(stats_str)
+
+
+
+
 
     # -- matplotlib colormap no overlap --
     if plot:
