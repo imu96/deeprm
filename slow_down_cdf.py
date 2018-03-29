@@ -183,36 +183,37 @@ def launch(pa, pg_resume=None, render=False, plot=False, repre='image', end='no_
         env.seq_no = (env.seq_no + 1) % env.pa.num_ex
 
     # let's crunch some statistics!
+    if pg_resume is not None:
 
-    stats_str = "\nStatistics: \n"
+        stats_str = "\nStatistics: \n"
 
-    disc_rew_ratios = []
+        disc_rew_ratios = []
 
 
-    for i in range(len(all_knapsac_val[test_types[0]])):
-        if all_discount_rews[ratio_comparers['optim_type']][i] == 0:
-            continue;
-        disc_rew_ratios.append(
-            float(all_discount_rews[ratio_comparers['learned_type']][i])/all_discount_rews[ratio_comparers['optim_type']][i]
-        )
+        for i in range(len(all_knapsac_val[test_types[0]])):
+            if all_discount_rews[ratio_comparers['optim_type']][i] == 0:
+                continue;
+            disc_rew_ratios.append(
+                float(all_discount_rews[ratio_comparers['learned_type']][i])/all_discount_rews[ratio_comparers['optim_type']][i]
+            )
 
-    avg_rew_ratio = float(sum(disc_rew_ratios))/len(disc_rew_ratios)
+        avg_rew_ratio = float(sum(disc_rew_ratios))/len(disc_rew_ratios)
 
-    adj_rew_ratios = map(lambda x: x+1, disc_rew_ratios)
-    avg_adj_rew_ratio = float(sum(adj_rew_ratios))/len(adj_rew_ratios)
+        adj_rew_ratios = map(lambda x: x+1, disc_rew_ratios)
+        avg_adj_rew_ratio = float(sum(adj_rew_ratios))/len(adj_rew_ratios)
 
-    stats_str += "Average Ratio Performance of "+ str(ratio_comparers["learned_type"]) + " against " + str(ratio_comparers["optim_type"]) + ":\t" + str(avg_rew_ratio) + " (original) \t" + str(avg_adj_rew_ratio) + " (adjusted)"
+        stats_str += "Average Ratio Performance of "+ str(ratio_comparers["learned_type"]) + " against " + str(ratio_comparers["optim_type"]) + ":\t" + str(avg_rew_ratio) + " (original) \t" + str(avg_adj_rew_ratio) + " (adjusted)"
 
-    # print disc_rew_ratios
+        # print disc_rew_ratios
 
-    var_rew = np.var(np.asarray(disc_rew_ratios))
-    var_adj_rew = np.var(np.asarray(adj_rew_ratios))
+        var_rew = np.var(np.asarray(disc_rew_ratios))
+        var_adj_rew = np.var(np.asarray(adj_rew_ratios))
 
-    stats_str += "\n " + "Variance of ratios: " + str(var_rew) + " (original) \t" + str(var_adj_rew) + " (adjusted)"
+        stats_str += "\n " + "Variance of ratios: " + str(var_rew) + " (original) \t" + str(var_adj_rew) + " (adjusted)"
 
-    print stats_str
+        print stats_str
 
-    # f.write(stats_str)
+        # f.write(stats_str)
 
 
 

@@ -99,7 +99,7 @@ class Dist:
         #check for going over upper/lower bounds and round off
         #maybe use random.randint to get 1 or 2 and then choose which normal to
        # generate from?
-
+        return
 
 
     def const_dist(self):
