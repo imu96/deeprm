@@ -252,7 +252,6 @@ class Env:
                 status = 'Allocate'
 
         if status == 'MoveOn':
-            self.curr_time += 1
             #self.machine.time_proceed(self.curr_time)
             #self.extra_info.time_proceed()
 
@@ -297,7 +296,6 @@ class Env:
 
                         self.extra_info.new_job_comes()
 
-            reward = self.get_reward()
 
         elif status == 'Allocate':
             self.job_record.record[self.job_slot.slot[0].id] = self.job_slot.slot[0]
@@ -310,6 +308,7 @@ class Env:
                 self.job_backlog.backlog[-1] = None
                 self.job_backlog.curr_size -= 1
 
+        reward = self.get_reward()
         ob = self.observe()
 
         info = self.job_record
@@ -322,8 +321,10 @@ class Env:
 
             self.reset()
 
-        if self.render:
+        if self.render and self.curr_time % self.pa.output_freq == 0:
             self.plot_state(test_type=test_type)
+
+        self.curr_time += 1
 
         return ob, reward, done, info
 
