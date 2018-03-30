@@ -16,7 +16,7 @@ class Parameters:
         self.simu_len = 150       # length of the busy cycle that repeats itself
         self.num_ex = 1                # number of jobsets
 
-        self.output_freq = 10          # interval for output and store parameters
+        self.output_freq = 1          # interval for output and store parameters
 
         self.num_seq_per_batch = 10    # number of sequences to compute baseline, actually number of trajectories
         self.episode_max_length = self.simu_len+2  # enforcing an artificial terminal
@@ -94,4 +94,7 @@ class Parameters:
         self.network_output_dim = self.num_res + 1  # + 1 for void action
         self.episode_max_length = self.simu_len+2  # enforcing an artificial terminal
         self.job_num_cap = self.simu_len          # maximum number of distinct colors in current work graph
+        self.dist = job_distribution.Dist(self.num_res, self.max_job_size, self.max_job_len)
+        # the actual distribution to generate
+        self.dist_func = self.dist.uniform_dist
 
