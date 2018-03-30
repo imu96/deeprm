@@ -67,7 +67,7 @@ def get_traj(test_type, pa, env, episode_max_length, pg_resume=None, render=Fals
             a = other_agents.get_sjf_action(env.machine, env.job_slot)
 
         elif test_type == 'Random':
-            a = other_agents.get_random_action(env.job_slot)
+            a = other_agents.get_random_action(pa.num_res)
 
         ob, rew, done, info = env.step(a, repeat=True, test_type=test_type)
 

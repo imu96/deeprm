@@ -11,23 +11,25 @@ def psi(upper_bound, lower_bound, frac):
     return threshold
 
 def get_kp_action(machine, job_slot, upper_bound, lower_bound):
-    bag = []
     used_space = 0
+    avbl_res = machine.avbl_slot[0, :]
     for i in xrange(len(job_slot.slot)):
-        new_job = job_slot.slot[i]
-        if new_job is None:
-            continue
-        used_space = sum (map (lambda x: x.res_vec[0], machine.running_job))
-        capacity = machine.res_slot
-        if  used_space == capacity:
-            break;
-        if new_job.len + used_space > capacity:
-            continue;
-        frac = used_space*1.0 / capacity
-        psi_i = psi(upper_bound, lower_bound, frac);
-        if new_job.res_vec[0] >=  psi_i:
-            return i
-    return len(job_slot.slot);
+        for res in xrange(machine.num_res):
+            new_job = job_slot.slot[i]
+            if new_job is None:
+                continue
+            used_space = machine.res_slot - avbl_res[res]
+            capacity = machine.res_slot
+            if used_space == capacity:
+                continue;
+            if new_job.len + used_space > capacity:
+                continue;
+            frac = used_space*1.0 / capacity
+            psi_i = psi(upper_bound, lower_bound, frac);
+            if new_job.len >=  psi_i:
+                return res
+
+    return machine.num_res
 
 def get_packer_action(machine, job_slot):
         align_score = 0
@@ -96,7 +98,7 @@ def get_packer_sjf_action(machine, job_slot, knob):  # knob controls which to fa
         return act
 
 
-def get_random_action(job_slot):
-    num_act = len(job_slot.slot) + 1  # if no action available,
+def get_random_action(num_res):
+    num_act = num_res + 1  # if no action available,
     act = np.random.randint(num_act)
     return act
