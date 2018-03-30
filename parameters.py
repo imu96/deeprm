@@ -9,20 +9,20 @@ class Parameters:
 
         self.output_filename = 'data/tmp'
 
-        self.num_items = 150
         self.max_density = 20
         self.min_density = 1
 
         self.num_epochs = 10000         # number of training epochs
-        self.simu_len = self.num_items       # length of the busy cycle that repeats itself
+        self.simu_len = 150       # length of the busy cycle that repeats itself
         self.num_ex = 1                # number of jobsets
 
-        self.output_freq = 1          # interval for output and store parameters
+        self.output_freq = 10          # interval for output and store parameters
 
         self.num_seq_per_batch = 10    # number of sequences to compute baseline, actually number of trajectories
-        self.episode_max_length = self.num_items  # enforcing an artificial terminal
+        self.episode_max_length = self.simu_len+2  # enforcing an artificial terminal
+        self.job_num_cap = self.simu_len          # maximum number of distinct colors in current work graph
 
-        self.num_res = 1               # number of resources in the system
+        self.num_res = 3               # number of resources in the system
         self.num_nw = 1                # maximum allowed number of work in the queue
 
         self.time_horizon = self.max_density         # number of time steps in the graph
@@ -34,7 +34,6 @@ class Parameters:
 
         self.max_track_since_new = 10  # track how many time steps since last new jobs
 
-        self.job_num_cap = self.num_items          # maximum number of distinct colors in current work graph
 
         self.new_job_rate = 0.7        # lambda in new job arrival Poisson Process
 					# the job rate would probably be much closer to one
@@ -92,5 +91,7 @@ class Parameters:
         self.network_compact_dim = (self.num_res + 1) * \
             (self.time_horizon + self.num_nw) + 1  # + 1 for backlog indicator
 
-        self.network_output_dim = self.num_nw + 1  # + 1 for void action
+        self.network_output_dim = self.num_res + 1  # + 1 for void action
+        self.episode_max_length = self.simu_len+2  # enforcing an artificial terminal
+        self.job_num_cap = self.simu_len          # maximum number of distinct colors in current work graph
 
