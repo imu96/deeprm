@@ -164,7 +164,7 @@ def plot_lr_curve(output_file_prefix, max_rew_lr_curve, mean_rew_lr_curve, slow_
 
     plt.legend(loc=4)
     plt.xlabel("Iteration", fontsize=20)
-    plt.ylabel("Discounted Total Reward", fontsize=20)
+    plt.ylabel("Knapsack Value", fontsize=20)
 
     ax = fig.add_subplot(122)
     ax.set_prop_cycle('color', [cm(1. * i / num_colors) for i in range(num_colors)])
@@ -191,7 +191,7 @@ def get_traj_worker(pg_learner, env, pa, result):
     all_ob = concatenate_all_ob(trajs, pa)
 
     # Compute discounted sums of rewards
-    rets = [discount(traj["reward"], pa.discount) for traj in trajs]
+    rets = [traj["reward"] for traj in trajs]
     maxlen = max(len(ret) for ret in rets)
     padded_rets = [np.concatenate([ret, np.zeros(maxlen - len(ret))]) for ret in rets]
 
@@ -203,7 +203,7 @@ def get_traj_worker(pg_learner, env, pa, result):
     all_action = np.concatenate([traj["action"] for traj in trajs])
     all_adv = np.concatenate(advs)
 
-    all_eprews = np.array([discount(traj["reward"], pa.discount)[0] for traj in trajs])  # episode total rewards
+    all_eprews = np.array([traj["reward"][-1] for traj in trajs])  # episode total rewards
     all_eplens = np.array([len(traj["reward"]) for traj in trajs])  # episode lengths
 
     # All Job Stat
