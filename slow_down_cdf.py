@@ -99,14 +99,16 @@ def launch(pa, pg_resume=None, render=False, plot=False, repre='image', end='no_
     env = environment.Env(pa, render=render, repre=repre, end=end)
     nw_len_seqs = env.nw_len_seqs
     nw_size_seqs = env.nw_size_seqs
+
     item_file = pa.output_filename + '_items.txt'
     with open(item_file, 'w') as f:
-        f.write("Job (size, value)\n")
+        f.write("Format: Job # (size, value)\n\n")
         for j in xrange(0, len(nw_len_seqs)):
-            f.write("Sequence "+str(j)+"\n")
+            f.write("Jobset "+str(j)+"\n")
             for i in xrange(0,len(nw_len_seqs[j])):
                 job_str = "Job "+str(i)+":"+"\t"+str(nw_size_seqs[j][i][0])+"\t"+str(nw_len_seqs[j][i]) + "\n"
                 f.write(job_str)
+            f.write("\n")
 
     all_discount_rews = {}
     all_knapsac_val = {}
@@ -129,8 +131,7 @@ def launch(pa, pg_resume=None, render=False, plot=False, repre='image', end='no_
 
    # for seq_idx in xrange(10):
     for seq_idx in xrange(pa.num_ex):
-        print('\n\n')
-        print("=============== " + str(seq_idx) + " ===============")
+        print("\n=============== " + str(seq_idx) + " ===============")
 
         for test_type in test_types:
 
@@ -139,7 +140,7 @@ def launch(pa, pg_resume=None, render=False, plot=False, repre='image', end='no_
             print "---------- " + test_type + " -----------"
 
             print "total discount reward : \t %s" % (discount(rews, pa.discount)[0])
-            print "value in knapsack \t %s" % (rews[-1])
+            print "value in knapsack : \t %s" % (rews[-1])
 
             all_discount_rews[test_type].append(
                 discount(rews, pa.discount)[0]
@@ -215,10 +216,6 @@ def launch(pa, pg_resume=None, render=False, plot=False, repre='image', end='no_
 
         # f.write(stats_str)
 
-
-
-
-
     # -- matplotlib colormap no overlap --
     if plot:
         num_colors = len(test_types)
@@ -236,7 +233,7 @@ def launch(pa, pg_resume=None, render=False, plot=False, repre='image', end='no_
         plt.xlabel("job slowdown", fontsize=20)
         plt.ylabel("CDF", fontsize=20)
         # plt.show()
-        plt.savefig(pg_resume + "_slowdown_fig" + ".pdf")
+        plt.savefig(pa.output_filename + "_slowdown_fig" + ".pdf")
 
     return all_discount_rews, jobs_slow_down
 

@@ -232,16 +232,17 @@ def launch(pa, pg_resume=None, render=False, repre='image', end='no_new_job'):
     envs = []
 
     nw_len_seqs, nw_size_seqs = job_distribution.generate_sequence_work(pa, seed=42)
+
     item_file = pa.output_filename + '_items.txt'
     with open(item_file, 'w') as f:
-        f.write("Job (size, value)\n")
+        f.write("Format: Job # (size, value)\n\n")
         for j in xrange(0, len(nw_len_seqs)):
-            f.write("Sequence "+str(j)+"\n")
+            f.write("Jobset "+str(j)+"\n")
             for i in xrange(0,len(nw_len_seqs[j])):
                 job_str = "Job "+str(i)+":"+"\t"+str(nw_size_seqs[j][i][0])+"\t"+str(nw_len_seqs[j][i]) + "\n"
                 f.write(job_str)
             f.write("\n")
-        
+
     for ex in xrange(pa.num_ex):
 
         print "-prepare for env-", ex
@@ -267,7 +268,7 @@ def launch(pa, pg_resume=None, render=False, repre='image', end='no_new_job'):
     accums = init_accums(pg_learners[pa.batch_size])
 
     # --------------------------------------
-    print("Preparing for reference data...")
+    print("\n\nPreparing for reference data...")
     # --------------------------------------
 
     ref_discount_rews, ref_slow_down = slow_down_cdf.launch(pa, pg_resume=None, render=False, plot=False, repre=repre, end=end)
@@ -276,12 +277,12 @@ def launch(pa, pg_resume=None, render=False, repre='image', end='no_new_job'):
     slow_down_lr_curve = []
 
     # --------------------------------------
-    print("Start training...")
+    print("\n\nStart training...")
     # --------------------------------------
 
     timer_start = time.time()
 
-    for iteration in xrange(1, pa.num_epochs):
+    for iteration in xrange(1, (pa.num_epochs+1)):
 
         ps = []  # threads
         manager = Manager()  # managing return results
@@ -310,7 +311,7 @@ def launch(pa, pg_resume=None, render=False, repre='image', end='no_new_job'):
 
             if ex_counter >= pa.batch_size or ex == pa.num_ex - 1:
 
-                print ex, "out of", pa.num_ex
+                print "\nExample", (ex + 1), "out of", pa.num_ex
 
                 ex_counter = 0
 
@@ -385,16 +386,29 @@ def launch(pa, pg_resume=None, render=False, repre='image', end='no_new_job'):
             cPickle.dump(pg_learners[pa.batch_size].get_params(), param_file, -1)
             param_file.close()
 
-            pa.unseen = True
-            slow_down_cdf.launch(pa, pa.output_filename + '_' + str(iteration) + '.pkl',
-                                 render=False, plot=True, repre=repre, end=end)
-            pa.unseen = False
             # test on unseen examples
+            print "\nInterim testing..."
+            pa.unseen = True
+            output_filename = pa.output_filename
+            pa.output_filename = pa.output_filename + '_' + str(iteration) + '.pkl_test'
 
-            plot_lr_curve(pa.output_filename,
+            slow_down_cdf.launch(pa, output_filename + '_' + str(iteration) + '.pkl',
+                                 render=False, plot=True, repre=repre, end=end)
+
+            # reset changed params for test
+            pa.unseen = False
+            pa.output_filename = output_filename
+
+            plot_lr_curve(pa.output_filename + '_' + str(iteration),
                           max_rew_lr_curve, mean_rew_lr_curve, slow_down_lr_curve,
                           ref_discount_rews, ref_slow_down)
 
+    param_file = open(pa.output_filename + '.pkl', 'wb')
+    cPickle.dump(pg_learners[pa.batch_size].get_params(), param_file, -1)
+    param_file.close()
+    plot_lr_curve(pa.output_filename,
+                  max_rew_lr_curve, mean_rew_lr_curve, slow_down_lr_curve,
+                  ref_discount_rews, ref_slow_down)
 
 def main():
 

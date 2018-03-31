@@ -167,7 +167,6 @@ class Env:
         ourcanvas[ourcanvas == 0] = -1
 
         for i in xrange(self.pa.num_res):
-
             plt.subplot(self.pa.num_res,
                         1 + self.pa.num_nw,  # first +1 for current work
                         i * (self.pa.num_nw) + skip_row + 1)  # +1 to avoid 0
@@ -175,7 +174,6 @@ class Env:
             plt.imshow(ourcanvas[i, :, :], interpolation='nearest', vmin=0, vmax=1, cmap=cm)
 
             for j in xrange(self.pa.num_nw):
-
                 job_slot = np.zeros((self.pa.time_horizon, self.pa.max_job_size))
                 if self.job_slot.slot[j] is not None:  # fill in a block of work
                     job_slot[: self.job_slot.slot[j].len, :self.job_slot.slot[j].res_vec[i]] = 1
@@ -192,6 +190,7 @@ class Env:
 
         plt.savefig(self.pa.output_filename + "_" + test_type + '_plot_' + str(self.curr_time) + '.pdf')
         plt.show()     # manual
+        plt.gcf().clear()
 
     def get_reward(self):
 
