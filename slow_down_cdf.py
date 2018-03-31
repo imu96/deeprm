@@ -111,7 +111,10 @@ def launch(pa, pg_resume=None, render=False, plot=False, repre='image', end='no_
             f.write("\n")
 
     all_discount_rews = {}
-    all_knapsac_val = {}
+    all_knapsac_vals = {}
+    disc_rew_ratios = {}
+    knapsac_val_ratios = {}
+
     jobs_slow_down = {}
     work_complete = {}
     work_remain = {}
@@ -120,8 +123,12 @@ def launch(pa, pg_resume=None, render=False, plot=False, repre='image', end='no_
     job_remain_delay = {}
 
     for test_type in test_types:
+
         all_discount_rews[test_type] = []
-        all_knapsac_val[test_type] = []
+        all_knapsac_vals[test_type] = []
+        disc_rew_ratios[test_type] = []
+        knapsac_val_ratios[test_type] = []
+
         jobs_slow_down[test_type] = []
         work_complete[test_type] = []
         work_remain[test_type] = []
@@ -146,8 +153,8 @@ def launch(pa, pg_resume=None, render=False, plot=False, repre='image', end='no_
                 discount(rews, pa.discount)[0]
             )
 
-            all_knapsac_val[test_type].append(
-                rews[-1]
+            all_knapsac_vals[test_type].append(
+                float(rews[-1])
             )
 
             # ------------------------
@@ -184,37 +191,43 @@ def launch(pa, pg_resume=None, render=False, plot=False, repre='image', end='no_
         env.seq_no = (env.seq_no + 1) % env.pa.num_ex
 
     # let's crunch some statistics!
+    for test_type in test_types:
+        disc_rew_ratios[test_type] = np.divide(all_discount_rews[test_type], all_discount_rews[ratio_comparers['optim_type']])
+        knapsac_val_ratios[test_type] = np.divide(all_knapsac_vals[test_type], all_knapsac_vals[ratio_comparers['optim_type']])
+
     if pg_resume is not None:
 
-        stats_str = "\nStatistics: \n"
+        print "\nStatistics: \n"
 
-        disc_rew_ratios = []
+        for test_type in test_types:
+            if test_type == ratio_comparers["optim_type"]:
+                continue
 
+            max_disc_rew = np.max(disc_rew_ratios[test_type])
+            min_disc_rew = np.min(disc_rew_ratios[test_type])
+            avg_disc_rew = np.mean(disc_rew_ratios[test_type])
+            avg_adj_disc_rew = np.mean(disc_rew_ratios[test_type]+1)
+            var_disc_rew = np.var(disc_rew_ratios[test_type])
+            var_adj_disc_rew = np.var(disc_rew_ratios[test_type]+1)
 
-        for i in range(len(all_knapsac_val[test_types[0]])):
-            if all_discount_rews[ratio_comparers['optim_type']][i] == 0:
-                continue;
-            disc_rew_ratios.append(
-                float(all_discount_rews[ratio_comparers['learned_type']][i])/all_discount_rews[ratio_comparers['optim_type']][i]
-            )
+            max_knap_val = np.max(knapsac_val_ratios[test_type])
+            min_knap_val = np.min(knapsac_val_ratios[test_type])
+            avg_knap_val = np.mean(knapsac_val_ratios[test_type])
+            avg_adj_knap_val = np.mean(knapsac_val_ratios[test_type]+1)
+            var_knap_val = np.var(knapsac_val_ratios[test_type])
+            var_adj_knap_val = np.var(knapsac_val_ratios[test_type]+1)
 
-        avg_rew_ratio = float(sum(disc_rew_ratios))/len(disc_rew_ratios)
+            print "Performance of " + test_type + " against " + ratio_comparers["optim_type"] + ":\n"
 
-        adj_rew_ratios = map(lambda x: x+1, disc_rew_ratios)
-        avg_adj_rew_ratio = float(sum(adj_rew_ratios))/len(adj_rew_ratios)
+            print "Max Total Reward Ratio: \t\t" + str(max_disc_rew)
+            print "Min Total Reward Ratio: \t\t" + str(min_disc_rew)
+            print "Average of Total Reward Ratios: \t" + str(avg_disc_rew) + " (original) \t" + str(avg_adj_disc_rew) + " (adjusted)"
+            print "Variance of Total Reward Ratios: \t" + str(var_disc_rew) + " (original) \t" + str(var_adj_disc_rew) + " (adjusted)\n"
 
-        stats_str += "Average Ratio Performance of "+ str(ratio_comparers["learned_type"]) + " against " + str(ratio_comparers["optim_type"]) + ":\t" + str(avg_rew_ratio) + " (original) \t" + str(avg_adj_rew_ratio) + " (adjusted)"
-
-        # print disc_rew_ratios
-
-        var_rew = np.var(np.asarray(disc_rew_ratios))
-        var_adj_rew = np.var(np.asarray(adj_rew_ratios))
-
-        stats_str += "\n " + "Variance of ratios: " + str(var_rew) + " (original) \t" + str(var_adj_rew) + " (adjusted)"
-
-        print stats_str
-
-        # f.write(stats_str)
+            print "Max Knapsack Value Ratio: \t\t" + str(max_knap_val)
+            print "Min Knapsack Value Ratio: \t\t" + str(min_knap_val)
+            print "Average of Knapsack Value Ratios: \t" + str(avg_knap_val) + " (original) \t" + str(avg_adj_knap_val) + " (adjusted)"
+            print "Variance of Knapsack Value Ratios: \t" + str(var_knap_val) + " (original) \t" + str(var_adj_knap_val) + " (adjusted)\n"
 
     # -- matplotlib colormap no overlap --
     if plot:
@@ -225,15 +238,15 @@ def launch(pa, pg_resume=None, render=False, plot=False, repre='image', end='no_
         ax.set_prop_cycle('color', [cm(1. * i / num_colors) for i in range(num_colors)])
 
         for test_type in test_types:
-            slow_down_cdf = np.sort(np.concatenate(jobs_slow_down[test_type]))
-            slow_down_yvals = np.arange(len(slow_down_cdf))/float(len(slow_down_cdf))
-            ax.plot(slow_down_cdf, slow_down_yvals, linewidth=2, label=test_type)
+            val_perf_cdf = np.sort(knapsac_val_ratios[test_type])
+            val_perf_yvals = np.arange(len(val_perf_cdf))/float(len(val_perf_cdf) - 1)
+            ax.plot(val_perf_cdf, val_perf_yvals, linewidth=2, label=test_type)
 
-        plt.legend(loc=4)
-        plt.xlabel("job slowdown", fontsize=20)
-        plt.ylabel("CDF", fontsize=20)
-        # plt.show()
-        plt.savefig(pa.output_filename + "_slowdown_fig" + ".pdf")
+        ax.legend(loc=4)
+        ax.set_xlabel("Performance vs. KP", fontsize=20)
+        ax.set_ylabel("CDF", fontsize=20)
+
+        plt.savefig(pa.output_filename + "_perfratio_fig" + ".pdf")
 
     return all_discount_rews, jobs_slow_down
 
