@@ -162,16 +162,17 @@ class Env:
         skip_row = 0
 
         cm = plt.get_cmap('gist_rainbow')
-        cm.set_bad(color="white")
-        ourcanvas = np.ma.masked_where(self.machine.canvas == 0, self.machine.canvas)
+        cm.set_under(color="white")
+        ourcanvas = np.copy(self.machine.canvas)
+        ourcanvas[ourcanvas == 0] = -1
+
         for i in xrange(self.pa.num_res):
 
-
             plt.subplot(self.pa.num_res,
-                        1 + self.pa.num_nw +1,  # first +1 for current work, last +1 for backlog queue
-                        i * (self.pa.num_nw + 1) + skip_row + 1)  # plot the backlog at the end, +1 to avoid 0
+                        1 + self.pa.num_nw,  # first +1 for current work
+                        i * (self.pa.num_nw) + skip_row + 1)  # +1 to avoid 0
 
-            plt.imshow(ourcanvas[i, :, :], interpolation='nearest', vmax=1, cmap=cm)
+            plt.imshow(ourcanvas[i, :, :], interpolation='nearest', vmin=0, vmax=1, cmap=cm)
 
             for j in xrange(self.pa.num_nw):
 
@@ -180,40 +181,17 @@ class Env:
                     job_slot[: self.job_slot.slot[j].len, :self.job_slot.slot[j].res_vec[i]] = 1
 
                 plt.subplot(self.pa.num_res,
-                            1 + self.pa.num_nw+1,  # first +1 for current work, last +1 for backlog queue
-                            1 + i * (self.pa.num_nw + 1) + j + skip_row + 1)  # plot the backlog at the end, +1 to avoid 0
+                            1 + self.pa.num_nw ,  # first +1 for current work
+                            1 + i * (self.pa.num_nw) + j + skip_row + 1)  # +1 to avoid 0
 
-                plt.imshow(job_slot, interpolation='nearest', vmax=1, cmap=cm)
+                job_slot[job_slot == 0] = -1
+                plt.imshow(job_slot, interpolation='nearest', vmin=0, vmax=1, cmap=cm)
 
                 if j == self.pa.num_nw - 1:
                     skip_row += 1
 
-        #skip_row -= 1
-        #backlog_width = int(math.ceil(self.pa.backlog_size / float(self.pa.time_horizon)))
-        #backlog = np.zeros((self.pa.time_horizon, backlog_width))
-
-        #backlog[: self.job_backlog.curr_size / backlog_width, : backlog_width] = 1
-        #backlog[self.job_backlog.curr_size / backlog_width, : self.job_backlog.curr_size % backlog_width] = 1
-
-        #plt.subplot(self.pa.num_res,
-        #            1 + self.pa.num_nw + 1,  # first +1 for current work, last +1 for backlog queue
-        #            self.pa.num_nw + 1 + 1)
-
-        #plt.imshow(backlog, interpolation='nearest', vmax=1)
-
-        #plt.subplot(self.pa.num_res,
-        #            1 + self.pa.num_nw + 1,  # first +1 for current work, last +1 for backlog queue
-        #            self.pa.num_res * (self.pa.num_nw + 1) + skip_row + 1)  # plot the backlog at the end, +1 to avoid 0
-
-        #extra_info = np.ones((self.pa.time_horizon, 1)) * \
-        #             self.extra_info.time_since_last_new_job / \
-        #             float(self.extra_info.max_tracking_time_since_last_job)
-
-        #plt.imshow(extra_info, interpolation='nearest', vmax=1)
-
-        plt.savefig(self.pa.output_filename + test_type + '_plot_' + str(self.curr_time) + '.pdf')
+        plt.savefig(self.pa.output_filename + "_" + test_type + '_plot_' + str(self.curr_time) + '.pdf')
         plt.show()     # manual
-        # plt.pause(0.01)  # automatic
 
     def get_reward(self):
 
