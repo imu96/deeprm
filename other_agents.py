@@ -16,9 +16,9 @@ def get_kp_action(machine, job_slot, upper_bound, lower_bound):
     for i in xrange(len(job_slot.slot)):
         for res in xrange(machine.num_res):
             new_job = job_slot.slot[i]
-            density = float(new_job.len) / new_job.res_vec[i]
             if new_job is None:
                 continue
+            density = float(new_job.len) / new_job.res_vec[i]
             used_space = machine.res_slot - avbl_res[res]
             capacity = machine.res_slot
             if new_job.res_vec[i] + used_space > capacity:
