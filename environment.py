@@ -93,7 +93,11 @@ class Env:
                 for j in xrange(self.pa.num_nw):
 
                     if self.job_slot.slot[j] is not None:  # fill in a block of work
-                        image_repr[: self.job_slot.slot[j].len, ir_pt: ir_pt + self.job_slot.slot[j].res_vec[i]] = 1
+                        job_q = self.job_slot.slot[j]
+                        q = int(np.floor(job_q.len / job_q.res_vec[i]))
+                        r = job_q.len - q*job_q.res_vec[i]
+                        image_repr[: q, ir_pt: ir_pt + job_q.res_vec[i]] = 1
+                        image_repr[q, ir_pt: ir_pt + r] = 1
 
                     ir_pt += self.pa.max_job_size
 
@@ -176,7 +180,11 @@ class Env:
             for j in xrange(self.pa.num_nw):
                 job_slot = np.zeros((self.pa.time_horizon, self.pa.max_job_size))
                 if self.job_slot.slot[j] is not None:  # fill in a block of work
-                    job_slot[: self.job_slot.slot[j].len, :self.job_slot.slot[j].res_vec[i]] = 1
+                    job_q = self.job_slot.slot[j]
+                    q = int(np.floor(job_q.len / job_q.res_vec[i]))
+                    r = job_q.len - q*job_q.res_vec[i]
+                    job_slot[: q, : job_q.res_vec[i]] = 1
+                    job_slot[q, : r] = 1
 
                 plt.subplot(self.pa.num_res,
                             1 + self.pa.num_nw ,  # first +1 for current work
@@ -364,15 +372,18 @@ class Machine:
 
         allocated = False
 
+        q = int(np.floor(job.len / job.res_vec[bin_num]))
+        r = job.len - q*job.res_vec[bin_num]
+
         t = 0
 
-        new_avbl_res = self.avbl_slot[t: t + job.len, bin_num] - job.res_vec[bin_num]
+        new_avbl_res = self.avbl_slot[t: t + q + 1, bin_num] - job.res_vec[bin_num]
 
         if np.all(new_avbl_res >= 0):
 
             allocated = True
 
-            self.avbl_slot[t: t + job.len, bin_num] = new_avbl_res
+            self.avbl_slot[t: t + q + 1, bin_num] = new_avbl_res
 
             self.running_job.append(job)
 
@@ -386,13 +397,14 @@ class Machine:
                     break
 
             canvas_start_time = t
-            canvas_end_time = job.len
+            canvas_end_time = q
 
 
             res = bin_num
             avbl_slot = np.where(self.canvas[res, 0, :] == 0)[0]
             for i in range(canvas_start_time, canvas_end_time):
                 self.canvas[res, i, avbl_slot[: job.res_vec[res]]] = new_color
+            self.canvas[res, canvas_end_time, avbl_slot[:r]] = new_color
 
         return allocated
 

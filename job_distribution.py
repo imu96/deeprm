@@ -73,11 +73,11 @@ class Dist:
     # THIS IS A UNIFORM DISTRIBUTION
     def uniform_dist(self):
 
-        # new work duration
-        nw_len = np.random.randint(self.min_job_len, self.job_len + 1)  # same length in every dimension
-
         x = np.random.randint(1, self.max_job_size + 1)
         nw_size = np.ones(self.num_res) * x
+        
+        # new work duration
+        nw_len = np.random.randint(1, self.job_len*nw_size + 1)  # same length in every dimension
 
 #       for i in range(self.num_res):
 #           nw_size[i] = np.random.randint(1, self.max_job_size + 1)
