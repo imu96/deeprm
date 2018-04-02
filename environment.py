@@ -94,8 +94,9 @@ class Env:
 
                     if self.job_slot.slot[j] is not None:  # fill in a block of work
                         job_q = self.job_slot.slot[j]
-                        q = int(np.floor(job_q.len / job_q.res_vec[i]))
-                        r = job_q.len - q*job_q.res_vec[i]
+                        q,r = divmod(job_q.len, job_q.res_vec[i])
+                        if (r == 0):
+                            q = q - 1
                         image_repr[: q, ir_pt: ir_pt + job_q.res_vec[i]] = 1
                         image_repr[q, ir_pt: ir_pt + r] = 1
 
@@ -181,8 +182,9 @@ class Env:
                 job_slot = np.zeros((self.pa.time_horizon, self.pa.max_job_size))
                 if self.job_slot.slot[j] is not None:  # fill in a block of work
                     job_q = self.job_slot.slot[j]
-                    q = int(np.floor(job_q.len / job_q.res_vec[i]))
-                    r = job_q.len - q*job_q.res_vec[i]
+                    q,r = divmod(job_q.len, job_q.res_vec[i])
+                    if (r == 0):
+                        q = q - 1
                     job_slot[: q, : job_q.res_vec[i]] = 1
                     job_slot[q, : r] = 1
 
@@ -372,8 +374,9 @@ class Machine:
 
         allocated = False
 
-        q = int(np.floor(job.len / job.res_vec[bin_num]))
-        r = job.len - q*job.res_vec[bin_num]
+        q,r = divmod(job.len, job.res_vec[bin_num])
+        if (r == 0):
+            q = q - 1
 
         t = 0
 
