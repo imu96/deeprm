@@ -248,7 +248,7 @@ def launch(pa, pg_resume=None, render=False, plot=False, repre='image', end='no_
 
         plt.savefig(pa.output_filename + "_perfratio_fig" + ".pdf")
 
-    return all_knapsac_vals, jobs_slow_down
+    return all_discount_rews, all_knapsac_vals, jobs_slow_down
 
 
 def main():

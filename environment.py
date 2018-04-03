@@ -227,6 +227,7 @@ class Env:
         reward = 0
         info = None
 
+
         if a == self.pa.num_res:  # explicit void action
             status = 'MoveOn'
         elif self.job_slot.slot[0] is None:  # implicit void action
@@ -238,7 +239,10 @@ class Env:
             else:
                 status = 'Allocate'
 
+#        print "Job: ", self.seq_idx, " Status: ", status, " Curr_time: ", self.curr_time
+
         if status == 'MoveOn':
+
             #self.machine.time_proceed(self.curr_time)
             #self.extra_info.time_proceed()
 
@@ -286,14 +290,24 @@ class Env:
 
         elif status == 'Allocate':
             self.job_record.record[self.job_slot.slot[0].id] = self.job_slot.slot[0]
-            self.job_slot.slot[0] = None
+            
+            # add new jobs
+            self.seq_idx += 1
 
-            # dequeue backlog
-            if self.job_backlog.curr_size > 0:
-                self.job_slot.slot[a] = self.job_backlog.backlog[0]  # if backlog empty, it will be 0
-                self.job_backlog.backlog[: -1] = self.job_backlog.backlog[1:]
-                self.job_backlog.backlog[-1] = None
-                self.job_backlog.curr_size -= 1
+            if self.seq_idx >= self.pa.simu_len:
+                done = True
+            
+            if not done:
+                new_job = self.get_new_job_from_seq(self.seq_no, self.seq_idx)
+
+                if new_job.len > 0:  # a new job comes
+
+                    for i in xrange(self.pa.num_nw):
+                        self.job_slot.slot[i] = new_job
+                        self.job_record.record[new_job.id] = new_job
+                        break
+
+                    self.extra_info.new_job_comes()
 
         reward = self.get_reward()
         ob = self.observe()
@@ -312,7 +326,6 @@ class Env:
             self.plot_state(test_type=test_type)
 
         self.curr_time += 1
-
         return ob, reward, done, info
 
     def reset(self):

@@ -147,8 +147,8 @@ def process_all_info(trajs):
     return enter_time, finish_time, job_len
 
 
-def plot_lr_curve(output_file_prefix, max_rew_lr_curve, mean_rew_lr_curve, slow_down_lr_curve,
-                  ref_discount_rews, ref_slow_down):
+def plot_lr_curve(output_file_prefix, max_rew_lr_curve, mean_rew_lr_curve, max_discrew_lr_curve, mean_discrew_lr_curve,
+                  ref_knap_vals, ref_discount_rews):
     num_colors = len(ref_discount_rews) + 2
     cm = plt.get_cmap('gist_rainbow')
 
@@ -157,25 +157,26 @@ def plot_lr_curve(output_file_prefix, max_rew_lr_curve, mean_rew_lr_curve, slow_
     ax = fig.add_subplot(121)
     ax.set_prop_cycle('color', [cm(1. * i / num_colors) for i in range(num_colors)])
 
-    ax.plot(mean_rew_lr_curve, linewidth=2, label='PG mean')
+    ax.plot(mean_discrew_lr_curve, linewidth=2, label='PG mean')
     for k in ref_discount_rews:
-        ax.plot(np.tile(np.average(ref_discount_rews[k]), len(mean_rew_lr_curve)), linewidth=2, label=k)
-    ax.plot(max_rew_lr_curve, linewidth=2, label='PG max')
+        ax.plot(np.tile(np.average(ref_discount_rews[k]), len(mean_discrew_lr_curve)), linewidth=2, label=k)
+    ax.plot(max_discrew_lr_curve, linewidth=2, label='PG max')
 
     plt.legend(loc=4)
     plt.xlabel("Iteration", fontsize=20)
-    plt.ylabel("Knapsack Value", fontsize=20)
+    plt.ylabel("Total Discounted Reward", fontsize=20)
 
     ax = fig.add_subplot(122)
     ax.set_prop_cycle('color', [cm(1. * i / num_colors) for i in range(num_colors)])
 
-    ax.plot(slow_down_lr_curve, linewidth=2, label='PG mean')
-    for k in ref_discount_rews:
-        ax.plot(np.tile(np.average(np.concatenate(ref_slow_down[k])), len(slow_down_lr_curve)), linewidth=2, label=k)
+    ax.plot(mean_rew_lr_curve, linewidth=2, label='PG mean')
+    for k in ref_knap_vals:
+        ax.plot(np.tile(np.average(ref_knap_vals[k]), len(mean_rew_lr_curve)), linewidth=2, label=k)
+    ax.plot(max_rew_lr_curve, linewidth=2, label='PG max')
 
     plt.legend(loc=1)
     plt.xlabel("Iteration", fontsize=20)
-    plt.ylabel("Slowdown", fontsize=20)
+    plt.ylabel("Knapsack Value", fontsize=20)
 
     plt.savefig(output_file_prefix + "_lr_curve" + ".pdf")
 
@@ -191,7 +192,7 @@ def get_traj_worker(pg_learner, env, pa, result):
     all_ob = concatenate_all_ob(trajs, pa)
 
     # Compute discounted sums of rewards
-    rets = [traj["reward"] for traj in trajs]
+    rets = [discount(traj["reward"], pa.discount) for traj in trajs]
     maxlen = max(len(ret) for ret in rets)
     padded_rets = [np.concatenate([ret, np.zeros(maxlen - len(ret))]) for ret in rets]
 
@@ -203,7 +204,8 @@ def get_traj_worker(pg_learner, env, pa, result):
     all_action = np.concatenate([traj["action"] for traj in trajs])
     all_adv = np.concatenate(advs)
 
-    all_eprews = np.array([traj["reward"][-1] for traj in trajs])  # episode total rewards
+    all_eprews = np.array([traj["reward"][-1] for traj in trajs])  # episode rewards
+    all_discrews = np.array([discount(traj["reward"], pa.discount)[0] for traj in trajs])  # episode total rewards
     all_eplens = np.array([len(traj["reward"]) for traj in trajs])  # episode lengths
 
     # All Job Stat
@@ -219,7 +221,8 @@ def get_traj_worker(pg_learner, env, pa, result):
                    "all_eprews": all_eprews,
                    "all_eplens": all_eplens,
                    "all_slowdown": all_slowdown,
-                   "all_entropy": all_entropy})
+                   "all_entropy": all_entropy,
+                   "all_discrews": all_discrews})
 
 
 def launch(pa, pg_resume=None, render=False, repre='image', end='no_new_job'):
@@ -271,9 +274,11 @@ def launch(pa, pg_resume=None, render=False, repre='image', end='no_new_job'):
     print("\n\nPreparing for reference data...")
     # --------------------------------------
 
-    ref_discount_rews, ref_slow_down = slow_down_cdf.launch(pa, pg_resume=None, render=False, plot=False, repre=repre, end=end)
+    ref_discount_rews, ref_knap_vals, ref_slow_down = slow_down_cdf.launch(pa, pg_resume=None, render=False, plot=False, repre=repre, end=end)
     mean_rew_lr_curve = []
     max_rew_lr_curve = []
+    mean_discrew_lr_curve = []
+    max_discrew_lr_curve = []
     slow_down_lr_curve = []
 
     # --------------------------------------
@@ -292,9 +297,11 @@ def launch(pa, pg_resume=None, render=False, repre='image', end='no_new_job'):
         np.random.shuffle(ex_indices)
 
         all_eprews = []
+        all_discrews = []
         grads_all = []
         loss_all = []
         eprews = []
+        discrews = []
         eplens = []
         all_slowdown = []
         all_entropy = []
@@ -339,8 +346,10 @@ def launch(pa, pg_resume=None, render=False, repre='image', end='no_new_job'):
                 grads_all.append(grads)
 
                 all_eprews.extend([r["all_eprews"] for r in result])
+                all_discrews.extend([r["all_discrews"] for r in result])
 
                 eprews.extend(np.concatenate([r["all_eprews"] for r in result]))  # episode total rewards
+                discrews.extend(np.concatenate([r["all_discrews"] for r in result]))  # episode total rewards
                 eplens.extend(np.concatenate([r["all_eplens"] for r in result]))  # episode lengths
 
                 all_slowdown.extend(np.concatenate([r["all_slowdown"] for r in result]))
@@ -369,7 +378,6 @@ def launch(pa, pg_resume=None, render=False, repre='image', end='no_new_job'):
         # print "Loss:     \t %s" % np.mean(loss_all)
         print "MaxRew: \t %s" % np.average([np.max(rew) for rew in all_eprews])
         print "MeanRew: \t %s +- %s" % (np.mean(eprews), np.std(eprews))
-        print "MeanSlowdown: \t %s" % np.mean(all_slowdown)
         print "MeanLen: \t %s +- %s" % (np.mean(eplens), np.std(eplens))
         print "MeanEntropy \t %s" % (np.mean(all_entropy))
         print "Elapsed time\t %s" % (timer_end - timer_start), "seconds"
@@ -379,7 +387,11 @@ def launch(pa, pg_resume=None, render=False, repre='image', end='no_new_job'):
 
         max_rew_lr_curve.append(np.average([np.max(rew) for rew in all_eprews]))
         mean_rew_lr_curve.append(np.mean(eprews))
+        
         slow_down_lr_curve.append(np.mean(all_slowdown))
+        
+        max_discrew_lr_curve.append(np.average([np.max(rew) for rew in all_discrews]))
+        mean_discrew_lr_curve.append(np.mean(discrews))
 
         if iteration % pa.output_freq == 0:
             param_file = open(pa.output_filename + '_' + str(iteration) + '.pkl', 'wb')
@@ -400,15 +412,15 @@ def launch(pa, pg_resume=None, render=False, repre='image', end='no_new_job'):
             pa.output_filename = output_filename
 
             plot_lr_curve(pa.output_filename + '_' + str(iteration),
-                          max_rew_lr_curve, mean_rew_lr_curve, slow_down_lr_curve,
-                          ref_discount_rews, ref_slow_down)
+                            max_rew_lr_curve, mean_rew_lr_curve, max_discrew_lr_curve, mean_discrew_lr_curve,
+                            ref_knap_vals, ref_discount_rews)
 
     param_file = open(pa.output_filename + '.pkl', 'wb')
     cPickle.dump(pg_learners[pa.batch_size].get_params(), param_file, -1)
     param_file.close()
     plot_lr_curve(pa.output_filename,
-                  max_rew_lr_curve, mean_rew_lr_curve, slow_down_lr_curve,
-                  ref_discount_rews, ref_slow_down)
+                    max_rew_lr_curve, mean_rew_lr_curve, max_discrew_lr_curve, mean_discrew_lr_curve,
+                    ref_knap_vals, ref_discount_rews)
 
 def main():
 
