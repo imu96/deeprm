@@ -8,12 +8,14 @@ class Parameters:
     def __init__(self):
 
         self.output_filename = 'data/tmp'
+        self.test_file = None
+        self.num_test_seqs = 1
 
-        self.max_density = 20
-        self.min_density = 1
+        self.max_density = 201
+        self.min_density = 1.0/201
 
         self.num_epochs = 10000         # number of training epochs
-        self.simu_len = 150       # length of the busy cycle that repeats itself
+        self.simu_len = 100       # length of the busy cycle that repeats itself
         self.num_ex = 1                # number of jobsets
 
         self.output_freq = 1          # interval for output and store parameters
@@ -22,13 +24,13 @@ class Parameters:
         self.episode_max_length = self.simu_len+2  # enforcing an artificial terminal
         self.job_num_cap = self.simu_len          # maximum number of distinct colors in current work graph
 
-        self.num_res = 3               # number of resources in the system
+        self.num_res = 1               # number of resources in the system
         self.num_nw = 1                # maximum allowed number of work in the queue
 
         self.time_horizon = self.max_density         # number of time steps in the graph
         self.max_job_len = self.max_density         # maximum duration of new jobs
-        self.res_slot = 200            # maximum number of available resource slots
-        self.max_job_size = 5*2         # maximum resource request of new work
+        self.res_slot = 2200           # maximum number of available resource slots
+        self.max_job_size = 1000         # maximum resource request of new work
 
         self.backlog_size = self.max_density         # backlog queue size
 
@@ -36,7 +38,7 @@ class Parameters:
 
 
         self.new_job_rate = 0.7        # lambda in new job arrival Poisson Process
-					# the job rate would probably be much closer to one
+                                	# the job rate would probably be much closer to one
 					# e.g. for lambda = 0.7 the expected number of jobs is <3
 
         self.discount = 1           # discount factor

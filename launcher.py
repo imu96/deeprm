@@ -35,7 +35,10 @@ def script_usage():
           '--ofile <output file name> \n'
           '--log <log file name> \n'
           '--render <plot dynamics> \n'
-          '--unseen <generate unseen example> \n')
+          '--unseen <generate unseen example> \n'
+          '--test_dir <pass in test files directory with 20 tests> \n'
+          '--num_test_seqs <number of random input sequences per test inst in test_dir> \n'
+          '--test_cap <capacity for testing (has to be smaller than res_slot)> \n')
 
 
 def main():
@@ -50,6 +53,8 @@ def main():
     log = None
 
     render = False
+
+    test_cap = None
 
     try:
         opts, args = getopt.getopt(
@@ -77,7 +82,10 @@ def main():
                       "ofile=",
                       "log=",
                       "render=",
-                      "unseen="])
+                      "unseen=",
+                      "test_dir=",
+                      "num_test_seqs=",
+                      "test_cap="])
 
     except getopt.GetoptError:
         script_usage()
@@ -136,6 +144,12 @@ def main():
         elif opt in ("-u", "--unseen"):
             #pa.generate_unseen = (arg == 'True')
             pa.unseen = (arg == 'True')
+        elif opt in ("--test_dir"):
+            pa.test_file = arg.strip("/")
+        elif opt in ("--num_test_seqs"):
+            pa.num_test_seqs = int(arg)
+        elif opt in ("--test_cap"):
+            test_cap = int(arg)
         else:
             script_usage()
             sys.exit()
@@ -152,8 +166,8 @@ def main():
         pg_v_re.launch(pa, pg_resume, v_resume, render)
     elif type_exp == 'test':
         # quick_test.launch(pa, pg_resume, render)
-        slow_down_cdf.launch(pa, pg_resume, render, True)
-    # elif type_exp == 'q_re':
+        slow_down_cdf.launch(pa, pg_resume, render, True, cap=test_cap)
+   # elif type_exp == 'q_re':
     #     q_re.launch(pa, q_resume, render)
     else:
         print("Error: unkown experiment type " + str(type_exp))

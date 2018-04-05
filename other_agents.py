@@ -10,7 +10,7 @@ def psi(upper_bound, lower_bound, frac):
     threshold = ((upper_bound*exp(1)/lower_bound)**frac)*(lower_bound/exp(1))
     return threshold
 
-def get_kp_action(machine, job_slot, upper_bound, lower_bound):
+def get_kp_action(machine, job_slot, upper_bound, lower_bound, cap=None):
     used_space = 0
     avbl_res = machine.avbl_slot[0, :]
     for i in xrange(len(job_slot.slot)):
@@ -18,9 +18,14 @@ def get_kp_action(machine, job_slot, upper_bound, lower_bound):
             new_job = job_slot.slot[i]
             if new_job is None:
                 continue
+
             density = float(new_job.len) / new_job.res_vec[i]
             used_space = machine.res_slot - avbl_res[res]
             capacity = machine.res_slot
+            if cap is not None:
+                used_space = cap - avbl_res[res]
+                capacity = cap
+
             if new_job.res_vec[i] + used_space > capacity:
                 continue;
             frac = used_space*1.0 / capacity

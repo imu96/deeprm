@@ -239,8 +239,6 @@ class Env:
             else:
                 status = 'Allocate'
 
-#        print "Job: ", self.seq_idx, " Status: ", status, " Curr_time: ", self.curr_time
-
         if status == 'MoveOn':
 
             #self.machine.time_proceed(self.curr_time)
@@ -290,13 +288,13 @@ class Env:
 
         elif status == 'Allocate':
             self.job_record.record[self.job_slot.slot[0].id] = self.job_slot.slot[0]
-            
+
             # add new jobs
             self.seq_idx += 1
 
             if self.seq_idx >= self.pa.simu_len:
                 done = True
-            
+
             if not done:
                 new_job = self.get_new_job_from_seq(self.seq_no, self.seq_idx)
 
